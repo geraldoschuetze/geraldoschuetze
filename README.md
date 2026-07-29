@@ -1,5 +1,3 @@
-## Geraldo Schuetze
-
 **Data Engineer** — I design, build and operate data platforms end to end: ingestion, dimensional modeling, orchestration, data quality and governance.
 
 [![LinkedIn](https://img.shields.io/badge/LinkedIn-geraldoschuetze-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/geraldoschuetze)

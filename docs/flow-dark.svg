@@ -1,0 +1,75 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 440" width="1200" height="440" role="img" aria-label="Brazil Economy Observatory end-to-end data flow: public sources to Airflow ingestion, event-driven dbt transform in PostgreSQL, served through Superset and OpenMetadata.">
+<defs>
+<marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#6e7681"/></marker>
+</defs>
+<rect width="1200" height="440" fill="none"/>
+<text x="30" y="34" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="10.5" font-weight="700" letter-spacing="0.9" fill="#8957e5">PUBLIC SOURCES</text>
+<text x="330" y="34" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="10.5" font-weight="700" letter-spacing="0.9" fill="#017CEE">ORCHESTRATION · AIRFLOW 3</text>
+<text x="630" y="34" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="10.5" font-weight="700" letter-spacing="0.9" fill="#336791">WAREHOUSE · POSTGRESQL 16</text>
+<text x="930" y="34" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="10.5" font-weight="700" letter-spacing="0.9" fill="#20A7C9">SERVING · PUBLIC, READ-ONLY</text>
+<rect x="30" y="60" width="240" height="64" rx="8" fill="#151b23" stroke="#3d444d" stroke-width="1"/>
+<path d="M31 69 a8 8 0 0 1 8-8 h0 v62 h0 a8 8 0 0 1-8-8 Z" fill="#8957e5"/>
+<text x="48" y="86" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="14" font-weight="600" fill="#e6edf3">BACEN</text>
+<text x="48" y="105" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="11.5" fill="#9198a1">SGS · PIX · Focus</text>
+<rect x="30" y="142" width="240" height="64" rx="8" fill="#151b23" stroke="#3d444d" stroke-width="1"/>
+<path d="M31 151 a8 8 0 0 1 8-8 h0 v62 h0 a8 8 0 0 1-8-8 Z" fill="#8957e5"/>
+<text x="48" y="168" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="14" font-weight="600" fill="#e6edf3">CVM</text>
+<text x="48" y="187" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="11.5" fill="#9198a1">daily fund reports · CDA</text>
+<rect x="30" y="224" width="240" height="64" rx="8" fill="#151b23" stroke="#3d444d" stroke-width="1"/>
+<path d="M31 233 a8 8 0 0 1 8-8 h0 v62 h0 a8 8 0 0 1-8-8 Z" fill="#8957e5"/>
+<text x="48" y="250" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="14" font-weight="600" fill="#e6edf3">IBGE</text>
+<text x="48" y="269" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="11.5" fill="#9198a1">IPCA</text>
+<rect x="330" y="60" width="240" height="88" rx="8" fill="#151b23" stroke="#3d444d" stroke-width="1"/>
+<path d="M331 69 a8 8 0 0 1 8-8 h0 v86 h0 a8 8 0 0 1-8-8 Z" fill="#017CEE"/>
+<text x="348" y="86" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="14" font-weight="600" fill="#e6edf3">6 ingestion DAGs</text>
+<text x="348" y="105" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="11.5" fill="#9198a1">idempotent · incremental</text>
+<text x="348" y="120" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="11.5" fill="#9198a1">cron aligned per publisher</text>
+<rect x="330" y="172" width="240" height="60" rx="8" fill="#151b23" stroke="#3d444d" stroke-width="1" stroke-dasharray="5 4"/>
+<path d="M331 181 a8 8 0 0 1 8-8 h0 v58 h0 a8 8 0 0 1-8-8 Z" fill="#017CEE"/>
+<text x="348" y="198" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="14" font-weight="600" fill="#e6edf3">Airflow Assets</text>
+<text x="348" y="217" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="11.5" fill="#9198a1">fire when all 6 land</text>
+<rect x="330" y="256" width="240" height="68" rx="8" fill="#151b23" stroke="#3d444d" stroke-width="1"/>
+<path d="M331 265 a8 8 0 0 1 8-8 h0 v66 h0 a8 8 0 0 1-8-8 Z" fill="#017CEE"/>
+<text x="348" y="282" font-family="ui-monospace, SFMono-Regular, 'SF Mono', Menlo, monospace" font-size="13" font-weight="600" fill="#e6edf3">dbt_transform</text>
+<text x="348" y="301" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="11.5" fill="#9198a1">event-driven, not cron</text>
+<path d="M645 69 a105.0 9 0 0 1 210 0 v38 a105.0 9 0 0 1 -210 0 Z" fill="#151b23" stroke="#336791" stroke-width="1.5"/>
+<path d="M645 69 a105.0 9 0 0 0 210 0" fill="none" stroke="#336791" stroke-width="1.5"/>
+<text x="750.0" y="95.0" text-anchor="middle" font-family="ui-monospace, SFMono-Regular, 'SF Mono', Menlo, monospace" font-size="13" font-weight="600" fill="#e6edf3">raw</text>
+<path d="M645 149 a105.0 9 0 0 1 210 0 v38 a105.0 9 0 0 1 -210 0 Z" fill="#151b23" stroke="#336791" stroke-width="1.5"/>
+<path d="M645 149 a105.0 9 0 0 0 210 0" fill="none" stroke="#336791" stroke-width="1.5"/>
+<text x="750.0" y="174" text-anchor="middle" font-family="ui-monospace, SFMono-Regular, 'SF Mono', Menlo, monospace" font-size="13" font-weight="600" fill="#e6edf3">staging</text>
+<text x="750.0" y="191" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="11" fill="#9198a1">9 models</text>
+<path d="M645 229 a105.0 9 0 0 1 210 0 v50 a105.0 9 0 0 1 -210 0 Z" fill="#151b23" stroke="#336791" stroke-width="1.5"/>
+<path d="M645 229 a105.0 9 0 0 0 210 0" fill="none" stroke="#336791" stroke-width="1.5"/>
+<text x="750.0" y="254" text-anchor="middle" font-family="ui-monospace, SFMono-Regular, 'SF Mono', Menlo, monospace" font-size="13" font-weight="600" fill="#e6edf3">marts</text>
+<text x="750.0" y="271" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="11" fill="#9198a1">17 models · star schema</text>
+<rect x="930" y="60" width="240" height="88" rx="8" fill="#151b23" stroke="#3d444d" stroke-width="1"/>
+<path d="M931 69 a8 8 0 0 1 8-8 h0 v86 h0 a8 8 0 0 1-8-8 Z" fill="#20A7C9"/>
+<text x="948" y="86" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="14" font-weight="600" fill="#e6edf3">Apache Superset</text>
+<text x="948" y="105" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="11.5" fill="#9198a1">public dashboard</text>
+<text x="948" y="120" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="11.5" fill="#9198a1">~29 charts</text>
+<rect x="930" y="176" width="240" height="88" rx="8" fill="#151b23" stroke="#3d444d" stroke-width="1"/>
+<path d="M931 185 a8 8 0 0 1 8-8 h0 v86 h0 a8 8 0 0 1-8-8 Z" fill="#20A7C9"/>
+<text x="948" y="202" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="14" font-weight="600" fill="#e6edf3">OpenMetadata</text>
+<text x="948" y="221" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="11.5" fill="#9198a1">column-level lineage</text>
+<text x="948" y="236" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="11.5" fill="#9198a1">glossary · data products</text>
+<path d="M270 92 C300 92 300 104 324 104" fill="none" stroke="#6e7681" stroke-width="1.6" marker-end="url(#ah)"/>
+<path d="M270 174 C300 174 300 110 324 108" fill="none" stroke="#6e7681" stroke-width="1.6" marker-end="url(#ah)"/>
+<path d="M270 256 C300 256 300 116 324 112" fill="none" stroke="#6e7681" stroke-width="1.6" marker-end="url(#ah)"/>
+<path d="M570 96 C600 96 610 88 639 88" fill="none" stroke="#6e7681" stroke-width="1.6" marker-end="url(#ah)"/>
+<path d="M450 148 L450 168" fill="none" stroke="#6e7681" stroke-width="1.6" stroke-dasharray="5 4" marker-end="url(#ah)"/>
+<text x="470" y="165" text-anchor="start" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="10.5" font-style="italic" fill="#7d8590">emits</text>
+<path d="M450 232 L450 252" fill="none" stroke="#6e7681" stroke-width="1.6" stroke-dasharray="5 4" marker-end="url(#ah)"/>
+<text x="470" y="249" text-anchor="start" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="10.5" font-style="italic" fill="#7d8590">triggers</text>
+<path d="M570 284 C600 284 605 168 639 168" fill="none" stroke="#6e7681" stroke-width="1.6" marker-end="url(#ah)"/>
+<text x="604" y="214" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="10.5" font-style="italic" fill="#7d8590">builds</text>
+<path d="M750 116 L750 136" fill="none" stroke="#6e7681" stroke-width="1.6" marker-end="url(#ah)"/>
+<path d="M750 196 L750 216" fill="none" stroke="#6e7681" stroke-width="1.6" marker-end="url(#ah)"/>
+<path d="M855 244 C895 244 895 104 924 104" fill="none" stroke="#6e7681" stroke-width="1.6" marker-end="url(#ah)"/>
+<path d="M855 258 C895 258 895 220 924 220" fill="none" stroke="#6e7681" stroke-width="1.6" marker-end="url(#ah)"/>
+<rect x="330" y="344" width="525" height="42" rx="7" fill="#0f141a" stroke="#2f363d" stroke-width="1"/>
+<text x="348" y="362" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="11.5" font-weight="600" fill="#e6edf3">51 dbt data-quality tests + per-source freshness SLAs</text>
+<text x="348" y="377" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="10.5" fill="#9198a1">a failing test stops the build before it reaches the dashboard</text>
+<rect x="30" y="400" width="1140" height="30" rx="7" fill="#0f141a" stroke="#2f363d" stroke-width="1" stroke-dasharray="4 3"/>
+<text x="600" y="419" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="11" fill="#9198a1">Cloudflare Tunnel — TLS, no inbound ports on the VM   ·   DEV → QA → PROD promoted by GitHub Actions   ·   Docker Compose on Oracle Cloud Always Free ARM, 24/7</text>
+</svg>

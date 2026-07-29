@@ -2,31 +2,31 @@
 
 **Data Engineer** — I design, build and operate data platforms end to end: ingestion, dimensional modeling, orchestration, data quality and governance.
 
-[![LinkedIn](https://img.shields.io/badge/LinkedIn-in%2Fgeraldoschuetze-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/geraldoschuetze)
-[![Live dashboard](https://img.shields.io/badge/Live%20dashboard-open%2C%20no%20login-1FA97F?style=for-the-badge&logo=apachesuperset&logoColor=white)](https://economy.geraldoschuetze.com/superset/dashboard/visao-geral/)
+[![LinkedIn](https://img.shields.io/badge/LinkedIn-geraldoschuetze-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/geraldoschuetze)
+[![Live dashboard](https://img.shields.io/badge/Live_dashboard-open,_no_login-1FA97F?style=for-the-badge)](https://economy.geraldoschuetze.com/superset/dashboard/visao-geral/)
 
 Right now I run the **Brazil Economy Observatory** — a production ELT platform over Brazilian public economic data, live 24/7 on an Oracle Cloud Always Free ARM VM.
 
 ### How it works
 
 ```mermaid
-flowchart LR
+flowchart TB
     subgraph SRC["Public sources"]
-        direction TB
+        direction LR
         BACEN["BACEN<br/>SGS · PIX · Focus"]
-        CVM["CVM<br/>daily fund reports · CDA"]
+        CVM["CVM<br/>funds · CDA"]
         IBGE["IBGE<br/>IPCA"]
     end
 
-    ING["<b>Apache Airflow 3</b><br/>6 ingestion DAGs<br/>idempotent, incremental<br/>cron aligned to each publisher"]
-    RAW[("raw<br/>PostgreSQL 16")]
-    EVT{{"Assets<br/>all 6 sources ready"}}
-    DBT["<b>dbt_transform</b><br/>event-driven, not cron<br/>51 tests + source freshness"]
-    STG[("staging<br/>9 models")]
-    MRT[("marts<br/>17 models · star schema")]
+    ING["<b>Apache Airflow 3</b> — 6 ingestion DAGs<br/>idempotent · incremental · cron per publisher"]
+    RAW[("raw — PostgreSQL 16")]
+    EVT{{"Airflow Assets<br/>all 6 sources landed"}}
+    DBT["<b>dbt_transform</b> — event-driven, not cron<br/>51 tests + source freshness"]
+    STG[("staging — 9 models")]
+    MRT[("marts — 17 models · star schema")]
     SUP["<b>Apache Superset</b><br/>public dashboard · ~29 charts"]
     OM["<b>OpenMetadata</b><br/>column-level lineage · glossary"]
-    CF["Cloudflare Tunnel<br/>TLS · no inbound ports on the VM"]
+    CF["Cloudflare Tunnel — TLS<br/>no inbound ports on the VM"]
     VIS(["Visitor — no login"])
 
     SRC --> ING

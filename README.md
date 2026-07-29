@@ -9,38 +9,10 @@ Right now I run the **Brazil Economy Observatory** — a production ELT platform
 
 ### How it works
 
-```mermaid
-flowchart TB
-    subgraph SRC["Public sources"]
-        direction LR
-        BACEN["BACEN<br/>SGS · PIX · Focus"]
-        CVM["CVM<br/>funds · CDA"]
-        IBGE["IBGE<br/>IPCA"]
-    end
-
-    ING["<b>Apache Airflow 3</b> — 6 ingestion DAGs<br/>idempotent · incremental · cron per publisher"]
-    RAW[("raw — PostgreSQL 16")]
-    EVT{{"Airflow Assets<br/>all 6 sources landed"}}
-    DBT["<b>dbt_transform</b> — event-driven, not cron<br/>51 tests + source freshness"]
-    STG[("staging — 9 models")]
-    MRT[("marts — 17 models · star schema")]
-    SUP["<b>Apache Superset</b><br/>public dashboard · ~29 charts"]
-    OM["<b>OpenMetadata</b><br/>column-level lineage · glossary"]
-    CF["Cloudflare Tunnel — TLS<br/>no inbound ports on the VM"]
-    VIS(["Visitor — no login"])
-
-    SRC --> ING
-    ING --> RAW
-    ING -. emits .-> EVT
-    EVT -. triggers .-> DBT
-    RAW --> DBT
-    DBT --> STG --> MRT
-    MRT --> SUP
-    MRT -. catalogued .-> OM
-    SUP --> CF
-    OM --> CF
-    CF --> VIS
-```
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/geraldoschuetze/geraldoschuetze/main/docs/flow-dark.svg">
+  <img alt="Brazil Economy Observatory — end-to-end flow: public sources feed six Airflow ingestion DAGs, which emit Assets that trigger an event-driven dbt build through raw, staging and marts in PostgreSQL, served publicly by Superset and OpenMetadata." src="https://raw.githubusercontent.com/geraldoschuetze/geraldoschuetze/main/docs/flow-light.svg" width="100%">
+</picture>
 
 The interesting part is the dotted path: ingestion doesn't schedule the transform. Each DAG emits an Airflow **Asset** when its source lands, and `dbt_transform` runs only once all six have arrived — so a late publication from BACEN delays the build instead of silently producing a partial one.
 

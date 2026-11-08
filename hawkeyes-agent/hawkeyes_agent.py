@@ -38,7 +38,10 @@ TEAM_ID = "2294"  # Iowa Hawkeyes no ESPN
 LOGO_URL = "https://a.espncdn.com/i/teamlogos/ncaa/500/2294.png"
 GOLD = "#FFCD00"
 BLACK = "#000000"
-OFFICIAL_SCHEDULE = "https://hawkeyesports.com/calendar/"
+OFFICIAL_SCHEDULE = "https://hawkeyesports.com/sports/football/schedule"
+RADIO_URL = "https://hawkeyesports.com/sports/2018/5/9/hawkeye-radio-network.aspx"
+ESPN_TEAM_URL = "https://www.espn.com/college-football/team/schedule/_/id/2294/iowa-hawkeyes"
+TICKETS_URL = "https://hawkeyesports.com/sports/2018/5/9/tickets.aspx"
 
 SPORTS = {
     "football/college-football": ("Futebol Americano · NCAA", "🏈"),
@@ -178,6 +181,23 @@ def watch_options(networks: list[str]) -> list[tuple[str, str, str]]:
     return opts
 
 
+def gcal_link(g: Game) -> str:
+    from urllib.parse import urlencode
+    vs = "vs." if g.home or g.neutral else "@"
+    start = g.start.astimezone(timezone.utc)
+    end = start + timedelta(hours=3, minutes=30)
+    tv = ", ".join(g.networks) or "TV a definir"
+    params = {
+        "action": "TEMPLATE",
+        "text": f"🏈 Iowa Hawkeyes {vs} {g.opponent}",
+        "dates": (f"{start:%Y%m%d}/{(start + timedelta(days=1)):%Y%m%d}" if g.time_tbd
+                  else f"{start:%Y%m%dT%H%M%SZ}/{end:%Y%m%dT%H%M%SZ}"),
+        "details": f"Onde assistir: {tv}\n{OFFICIAL_SCHEDULE}",
+        "location": ", ".join(x for x in [g.venue, g.city] if x),
+    }
+    return "https://calendar.google.com/calendar/render?" + urlencode(params)
+
+
 def fmt_local(dt: datetime, tz: ZoneInfo) -> str:
     d = dt.astimezone(tz)
     return f"{PT_WEEKDAYS[d.weekday()].capitalize()}, {d.day:02d} {PT_MONTHS[d.month - 1]} · {d:%H:%M}"
@@ -198,6 +218,7 @@ def game_card(g: Game, tz: ZoneInfo) -> str:
             f'<a href="{e(link)}" style="display:inline-block;margin:4px 6px 4px 0;padding:9px 14px;'
             f'background:{GOLD};color:{BLACK};font-weight:700;font-size:13px;text-decoration:none;border-radius:4px;">'
             f'📺 {e(label)}</a>'
+            f'<div style="font-size:11px;color:#666;margin:0 0 4px;"><a href="{e(link)}" style="color:#555;">{e(link)}</a></div>'
             for _, label, link in opts
         )
     else:
@@ -205,9 +226,17 @@ def game_card(g: Game, tz: ZoneInfo) -> str:
                    f'<a href="{OFFICIAL_SCHEDULE}" style="color:#000;font-weight:700;">ver calendário oficial</a></span>')
     opp_logo = (f'<img src="{e(g.opponent_logo)}" width="36" height="36" alt="" '
                 f'style="vertical-align:middle;margin-right:8px;border:0;">' if g.opponent_logo else "")
-    extra = ""
-    if g.espn_link:
-        extra += f'<a href="{e(g.espn_link)}" style="color:#000;font-size:12px;">Detalhes no ESPN ›</a>'
+    links = [
+        ("📊 Página do jogo / placar ao vivo (ESPN)", g.espn_link or ESPN_TEAM_URL),
+        ("📅 Adicionar ao Google Agenda", gcal_link(g)),
+        ("📻 Rádio ao vivo grátis (Hawkeye Radio Network)", RADIO_URL),
+        ("🗓️ Calendário oficial do futebol americano", OFFICIAL_SCHEDULE),
+    ]
+    if g.home and not g.neutral:
+        links.append(("🎟️ Ingressos (Kinnick Stadium)", TICKETS_URL))
+    extra = ('<div style="font-size:12px;font-weight:700;color:#000;margin-top:8px;">Links</div>'
+             + "".join(f'<div style="font-size:12px;line-height:1.7;"><a href="{e(u)}" style="color:#000;">{t} ›</a></div>'
+                       for t, u in links))
     if g.note:
         extra += f'<div style="color:#666;font-size:12px;margin-top:6px;">{e(g.note)}</div>'
     return f"""
@@ -235,7 +264,11 @@ def later_block(later: list[Game], tz: ZoneInfo) -> str:
         d = g.start.astimezone(tz)
         when = f"{d.day:02d}/{d.month:02d}" + ("" if g.time_tbd else f" · {d:%H:%M}")
         tv = ", ".join(g.networks) or "TV a definir"
-        rows.append(f"🏈 Iowa {vs} {html.escape(g.opponent)} — {when} ({html.escape(tv)})")
+        opts = watch_options(g.networks)
+        tv_html = (", ".join(f'<a href="{html.escape(l)}" style="color:#000;">{html.escape(lbl)}</a>' for _, lbl, l in opts)
+                   if opts else html.escape(tv))
+        rows.append(f"🏈 Iowa {vs} {html.escape(g.opponent)} — {when} ({tv_html}) · "
+                    f'<a href="{html.escape(gcal_link(g))}" style="color:#000;">📅 agenda</a>')
     return ('<tr><td style="padding:0 24px 12px;font-size:13px;color:#333;line-height:1.7;">'
             '<b>Próximos jogos:</b><br>' + "<br>".join(rows) + '</td></tr>')
 
@@ -279,7 +312,11 @@ def render_text(games: list[Game], title: str, tz: ZoneInfo) -> str:
         lines.append(f"{g.sport}: Iowa {vs} {g.opponent} — {when} (Brasília)")
         for net, label, link in watch_options(g.networks) or [("", "Canal a definir", OFFICIAL_SCHEDULE)]:
             lines.append(f"   📺 {label}: {link}")
+        lines.append(f"   📊 ESPN: {g.espn_link or ESPN_TEAM_URL}")
+        lines.append(f"   📅 Google Agenda: {gcal_link(g)}")
         lines.append("")
+    lines.append(f"📻 Rádio: {RADIO_URL}")
+    lines.append(f"🗓️ Calendário oficial: {OFFICIAL_SCHEDULE}")
     lines.append("Go Hawks!")
     return "\n".join(lines)
 

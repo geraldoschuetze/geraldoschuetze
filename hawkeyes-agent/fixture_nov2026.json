@@ -1,5 +1,5 @@
 [
- {"sport":"Futebol Americano · NCAA","icon":"🏈","start":"2026-11-15T00:30:00+00:00","opponent":"Purdue Boilermakers","home":true,"venue":"Kinnick Stadium","city":"Iowa City, IA","networks":["NBC","Peacock"]},
- {"sport":"Futebol Americano · NCAA","icon":"🏈","start":"2026-11-21T17:00:00+00:00","opponent":"Illinois Fighting Illini","home":false,"time_tbd":true,"venue":"Memorial Stadium","city":"Champaign, IL","networks":[]},
- {"sport":"Futebol Americano · NCAA","icon":"🏈","start":"2026-11-27T17:00:00+00:00","opponent":"Nebraska Cornhuskers","home":true,"venue":"Kinnick Stadium","city":"Iowa City, IA","networks":["CBS"]}
+ {"sport":"NCAA · Big Ten","icon":"","start":"2026-11-15T00:30:00+00:00","opponent":"Purdue Boilermakers","home":true,"venue":"Kinnick Stadium","city":"Iowa City, IA","networks":["NBC","Peacock"]},
+ {"sport":"NCAA · Big Ten","icon":"","start":"2026-11-21T17:00:00+00:00","opponent":"Illinois Fighting Illini","home":false,"time_tbd":true,"venue":"Memorial Stadium","city":"Champaign, IL","networks":[]},
+ {"sport":"NCAA · Big Ten","icon":"","start":"2026-11-27T17:00:00+00:00","opponent":"Nebraska Cornhuskers","home":true,"venue":"Kinnick Stadium","city":"Iowa City, IA","networks":["CBS"]}
 ]

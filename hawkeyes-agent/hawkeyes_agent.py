@@ -44,7 +44,7 @@ ESPN_TEAM_URL = "https://www.espn.com/college-football/team/schedule/_/id/2294/i
 TICKETS_URL = "https://hawkeyesports.com/sports/2018/5/9/tickets.aspx"
 
 SPORTS = {
-    "football/college-football": ("Futebol Americano · NCAA", "🏈"),
+    "football/college-football": ("NCAA · Big Ten", ""),
 }
 
 HAWKEYE_APP_URL = "https://hawkeyesports.com/app/"
@@ -54,14 +54,6 @@ PEACOCK_URL = "https://www.peacocktv.com/sports"
 
 FREE_GREEN = "#0a7a2f"
 PAID_RED = "#b3261e"
-
-
-def badge(free: bool, text: str | None = None) -> str:
-    """Selo GRÁTIS/PAGO feito com borda + texto colorido (sobrevive a clientes que removem fundos)."""
-    color = FREE_GREEN if free else PAID_RED
-    label = text or ("GRÁTIS" if free else "PAGO")
-    return (f'<span style="display:inline-block;border:1.5px solid {color};color:{color};font-size:10px;'
-            f'font-weight:800;letter-spacing:1px;padding:1px 6px;border-radius:10px;vertical-align:middle;">{label}</span>')
 
 
 # canal -> (onde assistir, link). Todos são streamings PAGOS (alguns com teste grátis).
@@ -221,60 +213,92 @@ def fmt_local(dt: datetime, tz: ZoneInfo) -> str:
     return f"{PT_WEEKDAYS[d.weekday()].capitalize()}, {d.day:02d} {PT_MONTHS[d.month - 1]} · {d:%H:%M}"
 
 
+FONT = "'Helvetica Neue',Helvetica,Arial,sans-serif"
+INK = "#111111"
+MUTED = "#6b6b6b"
+RULE = "#e3e3e3"
+
+
+def access_label(free: bool) -> str:
+    color = FREE_GREEN if free else MUTED
+    text = "Gratuito" if free else "Assinatura"
+    return f'<span style="color:{color};font-size:12px;font-weight:{700 if free else 400};">{text}</span>'
+
+
+def matchup(g: Game) -> str:
+    return f"Iowa {'vs.' if g.home or g.neutral else '@'} {g.opponent}"
+
+
+def date_parts(g: Game, tz: ZoneInfo) -> tuple[str, str, str]:
+    d = g.start.astimezone(tz)
+    wd = PT_WEEKDAYS[d.weekday()][:3].upper()
+    return wd, f"{d.day:02d}", PT_MONTHS[d.month - 1].upper()
+
+
+def watch_table(g: Game) -> str:
+    e = html.escape
+    rows = []
+    for net, label, link in watch_options(g.networks):
+        service = label.split(" · ", 1)[-1]
+        rows.append((net, service, link, False))
+    if not rows:
+        rows.append(("A definir", "Transmissão ainda não anunciada", OFFICIAL_SCHEDULE, True))
+    rows.append(("Rádio", "Hawkeye Radio", RADIO_URL, True))
+    rows.append(("App", "Hawkeye Sports", HAWKEYE_APP_URL, True))
+    cells = []
+    for i, (net, service, link, free) in enumerate(rows):
+        border = "" if i == 0 else f"border-top:1px solid {RULE};"
+        cells.append(
+            f'<tr><td style="{border}padding:9px 0;font-size:13px;font-weight:700;color:{INK};width:64px;">{e(net)}</td>'
+            f'<td style="{border}padding:9px 8px;font-size:13px;"><a href="{e(link)}" style="color:{INK};text-decoration:underline;">{e(service)}</a></td>'
+            f'<td align="right" style="{border}padding:9px 0;white-space:nowrap;">{access_label(free)}</td></tr>')
+    return ('<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-top:4px;">'
+            + "".join(cells) + '</table>')
+
+
 def game_card(g: Game, tz: ZoneInfo) -> str:
     e = html.escape
-    et = g.start.astimezone(ZoneInfo("America/New_York"))
+    wd, day, mon = date_parts(g, tz)
+    local = g.start.astimezone(tz)
     ct = g.start.astimezone(ZoneInfo("America/Chicago"))
-    when = f"{PT_WEEKDAYS[g.start.astimezone(tz).weekday()].capitalize()}, {g.start.astimezone(tz).day:02d} {PT_MONTHS[g.start.astimezone(tz).month - 1]} · horário a definir" if g.time_tbd else fmt_local(g.start, tz)
-    us_time = "" if g.time_tbd else f"{ct:%-I:%M %p} CT · {et:%-I:%M %p} ET"
-    vs = "vs." if g.home or g.neutral else "@"
-    where = "Em casa" if g.home and not g.neutral else ("Campo neutro" if g.neutral else "Fora")
+    et = g.start.astimezone(ZoneInfo("America/New_York"))
+    time_line = ("Horário a definir" if g.time_tbd
+                 else f"{local:%H:%M} (Brasília) &nbsp;·&nbsp; {ct:%-I:%M %p} CT &nbsp;·&nbsp; {et:%-I:%M %p} ET")
+    where = "Em casa" if g.home and not g.neutral else ("Campo neutro" if g.neutral else "Fora de casa")
     place = " · ".join(x for x in [g.venue, g.city] if x)
     opts = watch_options(g.networks)
+    cta = ""
     if opts:
-        buttons = "".join(
-            f'<a href="{e(link)}" style="display:inline-block;margin:4px 6px 4px 0;padding:9px 14px;'
-            f'background-color:{GOLD};border:2px solid {BLACK};border-bottom:4px solid {BLACK};color:{BLACK};font-weight:700;font-size:14px;text-decoration:none;border-radius:6px;">'
-            f'📺 {e(label)}</a>'
-            f'<div style="font-size:11px;color:#666;margin:0 0 6px;">{badge(False, "PAGO · assinatura")} '
-            f'<a href="{e(link)}" style="color:#555;">{e(link)}</a></div>'
-            for _, label, link in opts
-        )
-    else:
-        buttons = (f'<span style="color:#666;font-size:13px;">Canal ainda não anunciado — '
-                   f'<a href="{OFFICIAL_SCHEDULE}" style="color:#000;font-weight:700;">ver calendário oficial</a></span>')
-    opp_logo = (f'<img src="{e(g.opponent_logo)}" width="36" height="36" alt="" '
-                f'style="vertical-align:middle;margin-right:8px;border:0;">' if g.opponent_logo else "")
-    buttons += (f'<div style="font-size:12px;margin-top:4px;">🆓 <b>Sem pagar nada:</b> ouça ao vivo na '
-                f'<a href="{RADIO_URL}" style="color:#000;font-weight:700;">Hawkeye Radio Network</a> '
-                f'ou no <a href="{HAWKEYE_APP_URL}" style="color:#000;font-weight:700;">app oficial Hawkeye Sports</a> {badge(True)}</div>')
-    links = [
-        ("📻 Rádio ao vivo (Hawkeye Radio Network)", RADIO_URL, True),
-        ("📱 App oficial Hawkeye Sports", HAWKEYE_APP_URL, True),
-        ("📊 Página do jogo / placar ao vivo (ESPN)", g.espn_link or ESPN_TEAM_URL, True),
-        ("📅 Adicionar ao Google Agenda", gcal_link(g), True),
-        ("🗓️ Calendário oficial do futebol americano", OFFICIAL_SCHEDULE, True),
-    ]
+        _, label, link = opts[0]
+        cta = (f'<a href="{e(link)}" style="display:inline-block;background-color:{GOLD};border:1px solid {INK};'
+               f'color:{INK};font-size:13px;font-weight:700;text-decoration:none;padding:10px 18px;border-radius:3px;">'
+               f'Assistir: {e(label)}</a>')
+    links = [("Google Agenda", gcal_link(g)), ("Gamecast ESPN", g.espn_link or ESPN_TEAM_URL),
+             ("Calendário oficial", OFFICIAL_SCHEDULE)]
     if g.home and not g.neutral:
-        links.append(("🎟️ Ingressos (Kinnick Stadium)", TICKETS_URL, False))
-    extra = ('<div style="font-size:12px;font-weight:700;color:#000;margin-top:10px;">Outros links</div>'
-             + "".join(f'<div style="font-size:12px;line-height:1.9;">{badge(free)} '
-                       f'<a href="{e(u)}" style="color:#000;">{t} ›</a></div>'
-                       for t, u, free in links))
-    if g.note:
-        extra += f'<div style="color:#666;font-size:12px;margin-top:6px;">{e(g.note)}</div>'
+        links.append(("Ingressos", TICKETS_URL))
+    link_row = " &nbsp;|&nbsp; ".join(f'<a href="{e(u)}" style="color:{MUTED};">{t}</a>' for t, u in links)
+    note = f'<div style="font-size:12px;color:{MUTED};margin-top:8px;">{e(g.note)}</div>' if g.note else ""
     return f"""
-<tr><td style="padding:0 24px 16px;">
- <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border:1px solid #d9d9d9;border-top:4px solid {BLACK};border-left:8px solid {GOLD};border-radius:6px;">
-  <tr><td style="padding:14px 16px;">
-   <div style="font-size:11px;letter-spacing:1px;text-transform:uppercase;color:#7a6200;font-weight:700;">{g.icon} {e(g.sport)} · {where}</div>
-   <div style="font-size:20px;font-weight:800;color:{BLACK};margin:6px 0 4px;">{opp_logo}Iowa {vs} {e(g.opponent)}</div>
-   <div style="font-size:16px;font-weight:700;color:{BLACK};">🕒 {e(when)} <span style="font-weight:400;color:#555;font-size:13px;">(Brasília)</span></div>
-   {f'<div style="font-size:12px;color:#666;margin-top:2px;">{us_time}</div>' if us_time else ''}
-   {f'<div style="font-size:13px;color:#444;margin-top:4px;">📍 {e(place)}</div>' if place else ''}
-   <div style="margin-top:10px;">{buttons}</div>
-   <div style="margin-top:6px;">{extra}</div>
-  </td></tr>
+<tr><td style="padding:0 28px 22px;">
+ <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border:1px solid {RULE};">
+  <tr><td bgcolor="{INK}" style="background-color:{INK};padding:10px 18px;border-bottom:3px solid {GOLD};">
+    <span style="color:{GOLD};font-size:13px;font-weight:800;letter-spacing:1.5px;">{wd} {day} {mon}</span>
+    <span style="color:#ffffff;font-size:13px;font-weight:700;letter-spacing:1px;">&nbsp;·&nbsp; {"A DEFINIR" if g.time_tbd else local.strftime("%H:%M")}</span>
+   </td></tr>
+  <tr>
+   <td valign="top" style="padding:16px 18px;">
+    <div style="font-size:11px;color:{MUTED};letter-spacing:1.2px;text-transform:uppercase;">{e(g.sport)} &nbsp;·&nbsp; {where}</div>
+    <div style="font-size:20px;font-weight:800;color:{INK};margin:4px 0 6px;line-height:1.25;">{e(matchup(g))}</div>
+    <div style="font-size:14px;color:{INK};">{time_line}</div>
+    {f'<div style="font-size:13px;color:{MUTED};margin-top:2px;">{e(place)}</div>' if place else ''}
+    {f'<div style="margin-top:14px;">{cta}</div>' if cta else ''}
+    <div style="font-size:11px;color:{MUTED};letter-spacing:1.2px;text-transform:uppercase;margin-top:16px;">Onde acompanhar</div>
+    {watch_table(g)}
+    <div style="font-size:12px;margin-top:10px;">{link_row}</div>
+    {note}
+   </td>
+  </tr>
  </table>
 </td></tr>"""
 
@@ -282,73 +306,79 @@ def game_card(g: Game, tz: ZoneInfo) -> str:
 def later_block(later: list[Game], tz: ZoneInfo) -> str:
     if not later:
         return ""
+    e = html.escape
     rows = []
-    for g in later:
-        vs = "vs." if g.home or g.neutral else "@"
+    for i, g in enumerate(later):
         d = g.start.astimezone(tz)
-        when = f"{d.day:02d}/{d.month:02d}" + ("" if g.time_tbd else f" · {d:%H:%M}")
+        when = f"{PT_WEEKDAYS[d.weekday()][:3]} {d.day:02d}/{d.month:02d}" + ("" if g.time_tbd else f", {d:%H:%M}")
         tv = ", ".join(g.networks) or "TV a definir"
-        opts = watch_options(g.networks)
-        tv_html = (", ".join(f'<a href="{html.escape(l)}" style="color:#000;">{html.escape(lbl)}</a>' for _, lbl, l in opts)
-                   if opts else html.escape(tv))
-        rows.append(f"🏈 Iowa {vs} {html.escape(g.opponent)} — {when} ({tv_html}) · "
-                    f'<a href="{html.escape(gcal_link(g))}" style="color:#000;">📅 agenda</a>')
-    return ('<tr><td style="padding:0 24px 12px;font-size:13px;color:#333;line-height:1.7;">'
-            '<b>Próximos jogos:</b><br>' + "<br>".join(rows) + '</td></tr>')
+        border = "" if i == 0 else f"border-top:1px solid {RULE};"
+        rows.append(
+            f'<tr><td style="{border}padding:10px 0;">'
+            f'<div style="font-size:14px;color:{INK};font-weight:700;">{e(matchup(g))}</div>'
+            f'<div style="font-size:12px;color:{MUTED};margin-top:2px;">{when} &nbsp;·&nbsp; {e(tv)} &nbsp;·&nbsp; '
+            f'<a href="{e(gcal_link(g))}" style="color:{MUTED};">adicionar à agenda</a></div></td></tr>')
+    return (f'<tr><td style="padding:4px 28px 22px;">'
+            f'<div style="font-size:11px;color:{MUTED};letter-spacing:1.2px;text-transform:uppercase;'
+            f'border-bottom:2px solid {INK};padding-bottom:6px;">Próximos jogos</div>'
+            f'<table role="presentation" width="100%" cellpadding="0" cellspacing="0">{"".join(rows)}</table></td></tr>')
 
 
 def render_email(games: list[Game], title: str, subtitle: str, logo_src: str, tz: ZoneInfo,
                  later: list[Game] | None = None) -> str:
     cards = "".join(game_card(g, tz) for g in games) or (
-        '<tr><td style="padding:0 24px 16px;font-size:15px;">Semana de folga (bye week) — sem jogo nos próximos dias. Go Hawks! 🐤</td></tr>')
+        f'<tr><td style="padding:0 28px 22px;font-size:15px;color:{INK};">Semana sem jogo (bye week).</td></tr>')
     cards += later_block(later or [], tz)
+    logo = (f'<img src="{logo_src}" width="56" height="56" alt="" style="display:block;border:0;">' if logo_src else "")
     return f"""<!doctype html>
-<html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
-<body style="margin:0;padding:0;font-family:Arial,Helvetica,sans-serif;color:#111111;">
-<table role="presentation" width="100%" cellpadding="0" cellspacing="0">
-<tr><td align="center" style="padding:20px 8px;">
-<table role="presentation" width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;border:1px solid #d9d9d9;border-radius:8px;">
- <tr><td align="center" style="border-top:12px solid {BLACK};border-bottom:8px solid {GOLD};padding:22px 16px 18px;">
-  <img src="{logo_src}" width="96" height="96" alt="Iowa Hawkeyes" style="display:block;border:0;">
-  <div style="color:{BLACK};font-size:30px;font-weight:900;letter-spacing:3px;margin-top:10px;">IOWA <span style="border-bottom:5px solid {GOLD};">HAWKEYES</span></div>
-  <div style="color:#7a6200;font-size:12px;font-weight:700;letter-spacing:2px;margin-top:10px;text-transform:uppercase;">Futebol americano · NCAA · Big Ten</div>
-  <div style="color:#333333;font-size:15px;font-weight:700;margin-top:6px;">{html.escape(title)}</div>
+<html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="light"><meta name="supported-color-schemes" content="light"></head>
+<body style="margin:0;padding:0;background-color:#f4f4f4;">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" bgcolor="#f4f4f4" style="background-color:#f4f4f4;font-family:{FONT};">
+<tr><td align="center" style="padding:24px 10px;">
+<table role="presentation" width="600" cellpadding="0" cellspacing="0" bgcolor="#ffffff" style="max-width:600px;width:100%;background-color:#ffffff;border:1px solid {RULE};">
+ <tr><td bgcolor="{INK}" style="background-color:{INK};border-bottom:4px solid {GOLD};padding:20px 28px;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr>
+   {f'<td width="68" valign="middle">{logo}</td>' if logo else ''}
+   <td valign="middle">
+    <div style="color:{GOLD};font-size:22px;font-weight:800;letter-spacing:2px;">IOWA HAWKEYES</div>
+    <div style="color:#d6d6d6;font-size:12px;letter-spacing:1.5px;text-transform:uppercase;margin-top:2px;">Football &nbsp;·&nbsp; {html.escape(title)}</div>
+   </td></tr></table>
  </td></tr>
- <tr><td style="padding:18px 24px 12px;font-size:14px;color:#333;">{html.escape(subtitle)}</td></tr>
+ <tr><td style="padding:22px 28px 18px;font-size:14px;line-height:1.5;color:#333333;">{html.escape(subtitle)}</td></tr>
  {cards}
- <tr><td style="padding:4px 24px 20px;font-size:12px;color:#555;line-height:1.6;">
-  <div style="border:2px solid {BLACK};border-left:8px solid {GOLD};border-radius:6px;padding:12px 14px;margin-bottom:14px;color:#111;font-size:13px;line-height:1.6;">
-   <b style="font-size:14px;">⭐ Para ver TODOS os jogos dos Hawkeyes</b><br>
-   <a href="{YOUTUBE_TV_URL}" style="color:#000;font-weight:700;">YouTube TV (plano base)</a> {badge(False, "PAGO · tem teste grátis")}<br>
-   Tem BTN, FOX, FS1, CBS, NBC, ABC e ESPN — cobre praticamente toda a temporada da Big Ten.
-   Atenção: o plano “Sports” mais barato <b>não</b> inclui BTN.<br>
-   + <a href="{PEACOCK_URL}" style="color:#000;font-weight:700;">Peacock</a> {badge(False)} só se houver jogo exclusivo do Peacock.<br>
-   Alternativa equivalente: <a href="{FUBO_URL}" style="color:#000;font-weight:700;">Fubo</a> {badge(False, "PAGO · tem teste grátis")}
-  </div>
-  <b>Legenda:</b> {badge(True)} acesso livre, sem assinatura · {badge(False)} exige assinatura (use VPN com servidor nos EUA).<br>
-  • Streaming avulso por canal: <a href="https://www.foxsports.com/fox-one" style="color:#000;">FOX One</a> (FOX/FS1/BTN), <a href="https://www.peacocktv.com/" style="color:#000;">Peacock</a> (NBC), <a href="https://www.paramountplus.com/" style="color:#000;">Paramount+</a> (CBS) {badge(False)}<br>
-  • Calendário oficial: <a href="{OFFICIAL_SCHEDULE}" style="color:#000;">hawkeyesports.com</a> — horários podem mudar; confira perto do jogo.
+ <tr><td style="padding:0 28px 24px;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border:1px solid {RULE};border-left:3px solid {GOLD};">
+   <tr><td style="padding:14px 16px;font-size:13px;line-height:1.6;color:#333333;">
+    <div style="font-size:11px;color:{MUTED};letter-spacing:1.2px;text-transform:uppercase;margin-bottom:4px;">Para assistir a temporada inteira</div>
+    <b style="color:{INK};"><a href="{YOUTUBE_TV_URL}" style="color:{INK};">YouTube TV</a></b> (plano base) reúne BTN, FOX, FS1, CBS, NBC, ABC e ESPN.
+    O plano “Sports” não inclui a BTN. Jogos exclusivos do <a href="{PEACOCK_URL}" style="color:{INK};">Peacock</a> exigem assinatura à parte.
+    Alternativa com a mesma grade: <a href="{FUBO_URL}" style="color:{INK};">Fubo</a>. Ambos oferecem período de teste.
+   </td></tr></table>
  </td></tr>
- <tr><td align="center" style="border-top:8px solid {GOLD};border-bottom:12px solid {BLACK};color:{BLACK};padding:14px;font-size:14px;font-weight:900;letter-spacing:2px;">GO HAWKS! 🐤 <div style="color:#666666;font-weight:400;font-size:11px;letter-spacing:0;margin-top:4px;">Agente automático Hawkeyes</div></td></tr>
+ <tr><td style="padding:16px 28px 22px;border-top:1px solid {RULE};font-size:11px;line-height:1.6;color:{MUTED};">
+  Horários convertidos para Brasília a partir do calendário da ESPN; podem mudar — confirme no
+  <a href="{OFFICIAL_SCHEDULE}" style="color:{MUTED};">calendário oficial</a>.
+  Serviços de streaming exigem conexão a partir dos EUA (VPN).<br>
+  Resumo enviado às segundas-feiras e no dia de cada jogo. &nbsp;Go Hawks.
+ </td></tr>
 </table></td></tr></table></body></html>"""
 
 
 def render_text(games: list[Game], title: str, tz: ZoneInfo) -> str:
-    lines = [f"IOWA HAWKEYES — {title}", ""]
+    lines = [f"IOWA HAWKEYES FOOTBALL — {title}", ""]
     for g in games:
-        vs = "vs." if g.home or g.neutral else "@"
         when = "horário a definir" if g.time_tbd else fmt_local(g.start, tz)
-        lines.append(f"{g.sport}: Iowa {vs} {g.opponent} — {when} (Brasília)")
-        for net, label, link in watch_options(g.networks) or [("", "Canal a definir", OFFICIAL_SCHEDULE)]:
-            lines.append(f"   📺 [PAGO] {label}: {link}")
-        lines.append(f"   📻 [GRÁTIS] Rádio ao vivo: {RADIO_URL}")
-        lines.append(f"   📊 [GRÁTIS] ESPN: {g.espn_link or ESPN_TEAM_URL}")
-        lines.append(f"   📅 [GRÁTIS] Google Agenda: {gcal_link(g)}")
+        lines.append(f"{matchup(g)} — {when} (Brasília)")
+        for net, label, link in watch_options(g.networks):
+            lines.append(f"  {net}: {label.split(' · ', 1)[-1]} (assinatura) — {link}")
+        lines.append(f"  Rádio: Hawkeye Radio Network (gratuito) — {RADIO_URL}")
+        lines.append(f"  Google Agenda: {gcal_link(g)}")
         lines.append("")
-    lines.append(f"⭐ Para ver TODOS os jogos: YouTube TV plano base [PAGO, tem teste grátis] {YOUTUBE_TV_URL} (+ Peacock se houver exclusivo)")
-    lines.append(f"🗓️ Calendário oficial: {OFFICIAL_SCHEDULE}")
-    lines.append("Go Hawks!")
+    lines.append(f"Temporada inteira: YouTube TV, plano base — {YOUTUBE_TV_URL}")
+    lines.append(f"Calendário oficial: {OFFICIAL_SCHEDULE}")
     return "\n".join(lines)
+
 
 
 def download_logo() -> bytes | None:
@@ -367,7 +397,7 @@ def send(subject: str, html_body: str, text_body: str, logo: bytes | None) -> No
     to = os.environ.get("MAIL_TO", "geraldoschuetze@gmail.com")
     root = MIMEMultipart("related")
     root["Subject"] = subject
-    root["From"] = f"Hawkeyes Agent <{user}>"
+    root["From"] = f"Iowa Hawkeyes · Agenda <{user}>"
     root["To"] = to
     alt = MIMEMultipart("alternative")
     alt.attach(MIMEText(text_body, "plain", "utf-8"))
@@ -407,20 +437,25 @@ def main() -> int:
         if not selected:
             print("Nenhum jogo hoje — nada a enviar.")
             return 0
-        title = "É DIA DE JOGO!"
-        subtitle = "Jogo(s) de hoje, com horário de Brasília e onde assistir:"
+        title = "Dia de jogo"
+        subtitle = "Hoje tem Hawkeyes. Horário, transmissão e links abaixo."
         first = selected[0]
-        subject = f"🏈 Hoje: Iowa {'vs.' if first.home else '@'} {first.opponent} — {('a definir' if first.time_tbd else first.start.astimezone(tz).strftime('%H:%M'))}"
+        subject = f"Hoje: {matchup(first)} · {('horário a definir' if first.time_tbd else first.start.astimezone(tz).strftime('%Hh%M'))} · {', '.join(first.networks) or 'TV a definir'}"
     else:
         end = now + timedelta(days=days)
         selected = [g for g in upcoming if g.start <= end]
-        title = f"Agenda da semana · {today:%d/%m} a {(today + timedelta(days=days - 1)):%d/%m}"
-        subtitle = f"{len(selected)} {'jogo' if len(selected) == 1 else 'jogos'} nos próximos {days} dias. Horários em Brasília, com links para assistir nos EUA (via VPN)."
+        title = f"Semana {today:%d/%m} a {(today + timedelta(days=days - 1)):%d/%m}"
+        if selected:
+            subtitle = "Programação da semana com horários de Brasília, transmissão e opções gratuitas de acompanhamento."
+        else:
+            subtitle = "Sem jogo nesta semana. Confira os próximos compromissos."
         if selected:
             g0 = selected[0]
-            subject = f"🏈 Iowa Hawkeyes {'vs.' if g0.home or g0.neutral else '@'} {g0.opponent} — agenda da semana"
+            d0 = g0.start.astimezone(tz)
+            subject = (f"{matchup(g0)} · {PT_WEEKDAYS[d0.weekday()][:3]} {d0:%d/%m}"
+                       + ("" if g0.time_tbd else f", {d0:%Hh%M}") + f" · {', '.join(g0.networks) or 'TV a definir'}")
         else:
-            subject = "🏈 Iowa Hawkeyes — semana de folga"
+            subject = "Iowa Hawkeyes · semana sem jogo"
 
     logo = None if os.environ.get("DRY_RUN") else download_logo()
     logo_src = "cid:hawkeyes-logo" if logo else LOGO_URL

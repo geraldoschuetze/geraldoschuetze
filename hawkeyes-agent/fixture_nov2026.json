@@ -1,0 +1,67 @@
+[
+ {
+  "sport": "Basquete Masculino",
+  "icon": "🏀",
+  "start": "2026-11-11T00:00:00+00:00",
+  "opponent": "Virginia Tech Hokies",
+  "home": false,
+  "neutral": true,
+  "venue": "Tyson Events Center",
+  "city": "Sioux City, IA",
+  "networks": [
+   "FS1"
+  ]
+ },
+ {
+  "sport": "Basquete Feminino",
+  "icon": "🏀",
+  "start": "2026-11-13T01:30:00+00:00",
+  "opponent": "Northern Iowa Panthers",
+  "home": true,
+  "venue": "Carver-Hawkeye Arena",
+  "city": "Iowa City, IA",
+  "networks": [
+   "B1G+"
+  ],
+  "note": "Transmissão B1G+ indicada pelo site oficial; confirme perto do jogo."
+ },
+ {
+  "sport": "Futebol Americano",
+  "icon": "🏈",
+  "start": "2026-11-15T00:30:00+00:00",
+  "opponent": "Purdue Boilermakers",
+  "home": true,
+  "venue": "Kinnick Stadium",
+  "city": "Iowa City, IA",
+  "networks": [
+   "NBC",
+   "Peacock"
+  ]
+ },
+ {
+  "sport": "Basquete Feminino",
+  "icon": "🏀",
+  "start": "2026-11-15T18:00:00+00:00",
+  "opponent": "Vanderbilt Commodores",
+  "home": false,
+  "neutral": true,
+  "venue": "Tyson Events Center",
+  "city": "Sioux City, IA",
+  "networks": [
+   "FS1"
+  ]
+ },
+ {
+  "sport": "Basquete Masculino",
+  "icon": "🏀",
+  "start": "2026-11-15T20:00:00+00:00",
+  "opponent": "Creighton Bluejays",
+  "home": false,
+  "neutral": true,
+  "venue": "Wells Fargo Arena",
+  "city": "Des Moines, IA",
+  "networks": [
+   "FS1"
+  ]
+ }
+]

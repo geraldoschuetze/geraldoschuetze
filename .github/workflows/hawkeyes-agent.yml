@@ -1,0 +1,28 @@
+name: Iowa Hawkeyes agent
+
+on:
+  schedule:
+    # 12:00 UTC = 09:00 em Brasília. Segunda: resumo da semana. Outros dias: lembrete se houver jogo.
+    - cron: "0 12 * * *"
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "auto | digest | reminder"
+        default: "digest"
+        required: false
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Buscar jogos e enviar e-mail
+        env:
+          SMTP_USER: ${{ secrets.SMTP_USER }}
+          SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
+          MAIL_TO: ${{ secrets.MAIL_TO || 'geraldoschuetze@gmail.com' }}
+          MODE: ${{ github.event.inputs.mode || 'auto' }}
+        run: python hawkeyes-agent/hawkeyes_agent.py

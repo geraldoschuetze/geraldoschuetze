@@ -47,7 +47,25 @@ SPORTS = {
     "football/college-football": ("Futebol Americano · NCAA", "🏈"),
 }
 
-# canal -> (onde assistir, link). Ordem importa: chaves mais específicas antes.
+HAWKEYE_APP_URL = "https://hawkeyesports.com/app/"
+YOUTUBE_TV_URL = "https://tv.youtube.com/"
+FUBO_URL = "https://www.fubo.tv/welcome/teams/149"
+PEACOCK_URL = "https://www.peacocktv.com/sports"
+
+FREE_GREEN = "#0a7a2f"
+PAID_RED = "#b3261e"
+
+
+def badge(free: bool, text: str | None = None) -> str:
+    """Selo GRÁTIS/PAGO feito com borda + texto colorido (sobrevive a clientes que removem fundos)."""
+    color = FREE_GREEN if free else PAID_RED
+    label = text or ("GRÁTIS" if free else "PAGO")
+    return (f'<span style="display:inline-block;border:1.5px solid {color};color:{color};font-size:10px;'
+            f'font-weight:800;letter-spacing:1px;padding:1px 6px;border-radius:10px;vertical-align:middle;">{label}</span>')
+
+
+# canal -> (onde assistir, link). Todos são streamings PAGOS (alguns com teste grátis).
+# Ordem importa: chaves mais específicas antes.
 WATCH_LINKS = [
     ("BIG TEN NETWORK", "BTN · FOX One / YouTube TV / Fubo", "https://www.foxsports.com/live/btn"),
     ("BTN", "BTN · FOX One / YouTube TV / Fubo", "https://www.foxsports.com/live/btn"),
@@ -218,7 +236,8 @@ def game_card(g: Game, tz: ZoneInfo) -> str:
             f'<a href="{e(link)}" style="display:inline-block;margin:4px 6px 4px 0;padding:9px 14px;'
             f'background-color:{GOLD};border:2px solid {BLACK};border-bottom:4px solid {BLACK};color:{BLACK};font-weight:700;font-size:14px;text-decoration:none;border-radius:6px;">'
             f'📺 {e(label)}</a>'
-            f'<div style="font-size:11px;color:#666;margin:0 0 4px;"><a href="{e(link)}" style="color:#555;">{e(link)}</a></div>'
+            f'<div style="font-size:11px;color:#666;margin:0 0 6px;">{badge(False, "PAGO · assinatura")} '
+            f'<a href="{e(link)}" style="color:#555;">{e(link)}</a></div>'
             for _, label, link in opts
         )
     else:
@@ -226,17 +245,22 @@ def game_card(g: Game, tz: ZoneInfo) -> str:
                    f'<a href="{OFFICIAL_SCHEDULE}" style="color:#000;font-weight:700;">ver calendário oficial</a></span>')
     opp_logo = (f'<img src="{e(g.opponent_logo)}" width="36" height="36" alt="" '
                 f'style="vertical-align:middle;margin-right:8px;border:0;">' if g.opponent_logo else "")
+    buttons += (f'<div style="font-size:12px;margin-top:4px;">🆓 <b>Sem pagar nada:</b> ouça ao vivo na '
+                f'<a href="{RADIO_URL}" style="color:#000;font-weight:700;">Hawkeye Radio Network</a> '
+                f'ou no <a href="{HAWKEYE_APP_URL}" style="color:#000;font-weight:700;">app oficial Hawkeye Sports</a> {badge(True)}</div>')
     links = [
-        ("📊 Página do jogo / placar ao vivo (ESPN)", g.espn_link or ESPN_TEAM_URL),
-        ("📅 Adicionar ao Google Agenda", gcal_link(g)),
-        ("📻 Rádio ao vivo grátis (Hawkeye Radio Network)", RADIO_URL),
-        ("🗓️ Calendário oficial do futebol americano", OFFICIAL_SCHEDULE),
+        ("📻 Rádio ao vivo (Hawkeye Radio Network)", RADIO_URL, True),
+        ("📱 App oficial Hawkeye Sports", HAWKEYE_APP_URL, True),
+        ("📊 Página do jogo / placar ao vivo (ESPN)", g.espn_link or ESPN_TEAM_URL, True),
+        ("📅 Adicionar ao Google Agenda", gcal_link(g), True),
+        ("🗓️ Calendário oficial do futebol americano", OFFICIAL_SCHEDULE, True),
     ]
     if g.home and not g.neutral:
-        links.append(("🎟️ Ingressos (Kinnick Stadium)", TICKETS_URL))
-    extra = ('<div style="font-size:12px;font-weight:700;color:#000;margin-top:8px;">Links</div>'
-             + "".join(f'<div style="font-size:12px;line-height:1.7;"><a href="{e(u)}" style="color:#000;">{t} ›</a></div>'
-                       for t, u in links))
+        links.append(("🎟️ Ingressos (Kinnick Stadium)", TICKETS_URL, False))
+    extra = ('<div style="font-size:12px;font-weight:700;color:#000;margin-top:10px;">Outros links</div>'
+             + "".join(f'<div style="font-size:12px;line-height:1.9;">{badge(free)} '
+                       f'<a href="{e(u)}" style="color:#000;">{t} ›</a></div>'
+                       for t, u, free in links))
     if g.note:
         extra += f'<div style="color:#666;font-size:12px;margin-top:6px;">{e(g.note)}</div>'
     return f"""
@@ -293,11 +317,16 @@ def render_email(games: list[Game], title: str, subtitle: str, logo_src: str, tz
  <tr><td style="padding:18px 24px 12px;font-size:14px;color:#333;">{html.escape(subtitle)}</td></tr>
  {cards}
  <tr><td style="padding:4px 24px 20px;font-size:12px;color:#555;line-height:1.6;">
-  <b>Dicas com VPN (servidor nos EUA):</b><br>
-  • <a href="https://www.foxsports.com/fox-one" style="color:#000;">FOX One</a> cobre FOX, FS1 e BTN num só app.<br>
-  • <a href="https://tv.youtube.com/" style="color:#000;">YouTube TV</a> e <a href="https://www.fubo.tv/" style="color:#000;">Fubo</a> têm FOX, FS1, BTN, CBS, NBC, ESPN e ABC.<br>
-  • Jogos na NBC passam ao vivo no <a href="https://www.peacocktv.com/" style="color:#000;">Peacock</a>; na CBS, no <a href="https://www.paramountplus.com/" style="color:#000;">Paramount+</a>; TNT/truTV no <a href="https://www.hbomax.com/" style="color:#000;">HBO Max</a>.<br>
-  • Rádio grátis: <a href="https://hawkeyesports.com/sports/2018/5/9/hawkeye-radio-network.aspx" style="color:#000;">Hawkeye Radio Network</a>.<br>
+  <div style="border:2px solid {BLACK};border-left:8px solid {GOLD};border-radius:6px;padding:12px 14px;margin-bottom:14px;color:#111;font-size:13px;line-height:1.6;">
+   <b style="font-size:14px;">⭐ Para ver TODOS os jogos dos Hawkeyes</b><br>
+   <a href="{YOUTUBE_TV_URL}" style="color:#000;font-weight:700;">YouTube TV (plano base)</a> {badge(False, "PAGO · tem teste grátis")}<br>
+   Tem BTN, FOX, FS1, CBS, NBC, ABC e ESPN — cobre praticamente toda a temporada da Big Ten.
+   Atenção: o plano “Sports” mais barato <b>não</b> inclui BTN.<br>
+   + <a href="{PEACOCK_URL}" style="color:#000;font-weight:700;">Peacock</a> {badge(False)} só se houver jogo exclusivo do Peacock.<br>
+   Alternativa equivalente: <a href="{FUBO_URL}" style="color:#000;font-weight:700;">Fubo</a> {badge(False, "PAGO · tem teste grátis")}
+  </div>
+  <b>Legenda:</b> {badge(True)} acesso livre, sem assinatura · {badge(False)} exige assinatura (use VPN com servidor nos EUA).<br>
+  • Streaming avulso por canal: <a href="https://www.foxsports.com/fox-one" style="color:#000;">FOX One</a> (FOX/FS1/BTN), <a href="https://www.peacocktv.com/" style="color:#000;">Peacock</a> (NBC), <a href="https://www.paramountplus.com/" style="color:#000;">Paramount+</a> (CBS) {badge(False)}<br>
   • Calendário oficial: <a href="{OFFICIAL_SCHEDULE}" style="color:#000;">hawkeyesports.com</a> — horários podem mudar; confira perto do jogo.
  </td></tr>
  <tr><td align="center" style="border-top:8px solid {GOLD};border-bottom:12px solid {BLACK};color:{BLACK};padding:14px;font-size:14px;font-weight:900;letter-spacing:2px;">GO HAWKS! 🐤 <div style="color:#666666;font-weight:400;font-size:11px;letter-spacing:0;margin-top:4px;">Agente automático Hawkeyes</div></td></tr>
@@ -311,11 +340,12 @@ def render_text(games: list[Game], title: str, tz: ZoneInfo) -> str:
         when = "horário a definir" if g.time_tbd else fmt_local(g.start, tz)
         lines.append(f"{g.sport}: Iowa {vs} {g.opponent} — {when} (Brasília)")
         for net, label, link in watch_options(g.networks) or [("", "Canal a definir", OFFICIAL_SCHEDULE)]:
-            lines.append(f"   📺 {label}: {link}")
-        lines.append(f"   📊 ESPN: {g.espn_link or ESPN_TEAM_URL}")
-        lines.append(f"   📅 Google Agenda: {gcal_link(g)}")
+            lines.append(f"   📺 [PAGO] {label}: {link}")
+        lines.append(f"   📻 [GRÁTIS] Rádio ao vivo: {RADIO_URL}")
+        lines.append(f"   📊 [GRÁTIS] ESPN: {g.espn_link or ESPN_TEAM_URL}")
+        lines.append(f"   📅 [GRÁTIS] Google Agenda: {gcal_link(g)}")
         lines.append("")
-    lines.append(f"📻 Rádio: {RADIO_URL}")
+    lines.append(f"⭐ Para ver TODOS os jogos: YouTube TV plano base [PAGO, tem teste grátis] {YOUTUBE_TV_URL} (+ Peacock se houver exclusivo)")
     lines.append(f"🗓️ Calendário oficial: {OFFICIAL_SCHEDULE}")
     lines.append("Go Hawks!")
     return "\n".join(lines)

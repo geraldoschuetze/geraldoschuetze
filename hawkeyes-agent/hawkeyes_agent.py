@@ -216,7 +216,7 @@ def game_card(g: Game, tz: ZoneInfo) -> str:
     if opts:
         buttons = "".join(
             f'<a href="{e(link)}" style="display:inline-block;margin:4px 6px 4px 0;padding:9px 14px;'
-            f'background:{GOLD};color:{BLACK};font-weight:700;font-size:13px;text-decoration:none;border-radius:4px;">'
+            f'background-color:{GOLD};border:2px solid {BLACK};border-bottom:4px solid {BLACK};color:{BLACK};font-weight:700;font-size:14px;text-decoration:none;border-radius:6px;">'
             f'📺 {e(label)}</a>'
             f'<div style="font-size:11px;color:#666;margin:0 0 4px;"><a href="{e(link)}" style="color:#555;">{e(link)}</a></div>'
             for _, label, link in opts
@@ -241,7 +241,7 @@ def game_card(g: Game, tz: ZoneInfo) -> str:
         extra += f'<div style="color:#666;font-size:12px;margin-top:6px;">{e(g.note)}</div>'
     return f"""
 <tr><td style="padding:0 24px 16px;">
- <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border:1px solid #e5e5e5;border-left:6px solid {GOLD};border-radius:6px;background:#fff;">
+ <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border:1px solid #d9d9d9;border-top:4px solid {BLACK};border-left:8px solid {GOLD};border-radius:6px;">
   <tr><td style="padding:14px 16px;">
    <div style="font-size:11px;letter-spacing:1px;text-transform:uppercase;color:#7a6200;font-weight:700;">{g.icon} {e(g.sport)} · {where}</div>
    <div style="font-size:20px;font-weight:800;color:{BLACK};margin:6px 0 4px;">{opp_logo}Iowa {vs} {e(g.opponent)}</div>
@@ -280,16 +280,16 @@ def render_email(games: list[Game], title: str, subtitle: str, logo_src: str, tz
     cards += later_block(later or [], tz)
     return f"""<!doctype html>
 <html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
-<body style="margin:0;padding:0;background:#f2f2f2;font-family:Arial,Helvetica,sans-serif;">
-<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f2f2f2;">
+<body style="margin:0;padding:0;font-family:Arial,Helvetica,sans-serif;color:#111111;">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0">
 <tr><td align="center" style="padding:20px 8px;">
-<table role="presentation" width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;background:#fafafa;border-radius:8px;overflow:hidden;">
- <tr><td align="center" style="background:{BLACK};padding:24px 16px 18px;">
+<table role="presentation" width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;border:1px solid #d9d9d9;border-radius:8px;">
+ <tr><td align="center" style="border-top:12px solid {BLACK};border-bottom:8px solid {GOLD};padding:22px 16px 18px;">
   <img src="{logo_src}" width="96" height="96" alt="Iowa Hawkeyes" style="display:block;border:0;">
-  <div style="color:{GOLD};font-size:26px;font-weight:900;letter-spacing:2px;margin-top:10px;">IOWA HAWKEYES</div>
-  <div style="color:#fff;font-size:14px;margin-top:4px;">{html.escape(title)}</div>
+  <div style="color:{BLACK};font-size:30px;font-weight:900;letter-spacing:3px;margin-top:10px;">IOWA <span style="border-bottom:5px solid {GOLD};">HAWKEYES</span></div>
+  <div style="color:#7a6200;font-size:12px;font-weight:700;letter-spacing:2px;margin-top:10px;text-transform:uppercase;">Futebol americano · NCAA · Big Ten</div>
+  <div style="color:#333333;font-size:15px;font-weight:700;margin-top:6px;">{html.escape(title)}</div>
  </td></tr>
- <tr><td style="background:{GOLD};height:6px;line-height:6px;font-size:0;">&nbsp;</td></tr>
  <tr><td style="padding:18px 24px 12px;font-size:14px;color:#333;">{html.escape(subtitle)}</td></tr>
  {cards}
  <tr><td style="padding:4px 24px 20px;font-size:12px;color:#555;line-height:1.6;">
@@ -300,7 +300,7 @@ def render_email(games: list[Game], title: str, subtitle: str, logo_src: str, tz
   • Rádio grátis: <a href="https://hawkeyesports.com/sports/2018/5/9/hawkeye-radio-network.aspx" style="color:#000;">Hawkeye Radio Network</a>.<br>
   • Calendário oficial: <a href="{OFFICIAL_SCHEDULE}" style="color:#000;">hawkeyesports.com</a> — horários podem mudar; confira perto do jogo.
  </td></tr>
- <tr><td align="center" style="background:{BLACK};color:{GOLD};padding:14px;font-size:13px;font-weight:700;letter-spacing:1px;">GO HAWKS! 🐤 &nbsp;·&nbsp; <span style="color:#bbb;font-weight:400;">Agente automático Hawkeyes</span></td></tr>
+ <tr><td align="center" style="border-top:8px solid {GOLD};border-bottom:12px solid {BLACK};color:{BLACK};padding:14px;font-size:14px;font-weight:900;letter-spacing:2px;">GO HAWKS! 🐤 <div style="color:#666666;font-weight:400;font-size:11px;letter-spacing:0;margin-top:4px;">Agente automático Hawkeyes</div></td></tr>
 </table></td></tr></table></body></html>"""
 
 
@@ -385,7 +385,7 @@ def main() -> int:
         end = now + timedelta(days=days)
         selected = [g for g in upcoming if g.start <= end]
         title = f"Agenda da semana · {today:%d/%m} a {(today + timedelta(days=days - 1)):%d/%m}"
-        subtitle = f"{len(selected)} jogo(s) de futebol americano nos próximos {days} dias. Horários em Brasília, com links para assistir nos EUA (via VPN)."
+        subtitle = f"{len(selected)} {'jogo' if len(selected) == 1 else 'jogos'} nos próximos {days} dias. Horários em Brasília, com links para assistir nos EUA (via VPN)."
         if selected:
             g0 = selected[0]
             subject = f"🏈 Iowa Hawkeyes {'vs.' if g0.home or g0.neutral else '@'} {g0.opponent} — agenda da semana"

@@ -2,7 +2,7 @@ name: Iowa Hawkeyes agent
 
 on:
   schedule:
-    # 12:00 UTC = 09:00 em Brasília. Segunda: resumo da semana. Outros dias: lembrete se houver jogo.
+    # 12:00 UTC = 09:00 em Brasília. Segunda: resumo da semana. Dia de jogo: lembrete.
     - cron: "0 12 * * *"
   workflow_dispatch:
     inputs:

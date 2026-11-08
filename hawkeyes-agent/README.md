@@ -1,7 +1,8 @@
 # 🐤 Agente Iowa Hawkeyes
 
-Agente automático que verifica **quando** e **onde assistir** os jogos do Iowa Hawkeyes
-(futebol americano, basquete masculino e feminino) e envia um e-mail com a identidade
+Agente automático que verifica **quando** e **onde assistir** os jogos do time de
+**futebol americano universitário masculino do Iowa Hawkeyes** (University of Iowa,
+NCAA FBS / Big Ten) e envia um e-mail com a identidade
 visual do time (preto `#000000` e dourado `#FFCD00`, logo Tigerhawk) para
 `geraldoschuetze@gmail.com`.
 
@@ -10,8 +11,8 @@ visual do time (preto `#000000` e dourado `#FFCD00`, logo Tigerhawk) para
 - **Links:** cada canal vira um botão para o streaming americano correspondente
   (FOX One/FS1/BTN, Peacock, Paramount+, ESPN, HBO Max, B1G+…) — use VPN nos EUA.
 - **Quando envia** (GitHub Actions, todo dia às 09:00 de Brasília):
-  - **segunda-feira** → resumo com os jogos dos próximos 8 dias;
-  - **outros dias** → lembrete “É dia de jogo!” só se houver jogo naquele dia.
+  - **segunda-feira** → resumo com o jogo da semana (+ os próximos 3 jogos);
+  - **dia de jogo** → lembrete “É dia de jogo!” com horário e canal.
 
 ## Configuração (uma vez)
 

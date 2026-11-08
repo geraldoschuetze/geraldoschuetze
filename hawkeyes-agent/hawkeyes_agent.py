@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-"""Agente Iowa Hawkeyes: busca os próximos jogos (futebol americano e basquete
-masculino/feminino), descobre o canal de TV/streaming nos EUA e envia um e-mail
+"""Agente Iowa Hawkeyes: busca os próximos jogos do time de futebol americano
+universitário (University of Iowa, NCAA / Big Ten), descobre o canal de TV/streaming nos EUA e envia um e-mail
 com a identidade visual do time (preto e dourado + logo Tigerhawk).
 
 Fonte de dados: API pública do ESPN (sem chave). Só usa a biblioteca padrão.
@@ -11,6 +11,7 @@ Variáveis de ambiente:
   MAIL_TO         destinatário (padrão: geraldoschuetze@gmail.com)
   MODE            auto | digest | reminder   (padrão: auto)
   DAYS_AHEAD      janela do resumo semanal em dias (padrão: 8)
+  NEXT_COUNT      quantos jogos seguintes listar no rodapé (padrão: 3)
   LOCAL_TZ        fuso para exibir horários (padrão: America/Sao_Paulo)
   DRY_RUN=1       não envia, só grava preview.html
 
@@ -40,9 +41,7 @@ BLACK = "#000000"
 OFFICIAL_SCHEDULE = "https://hawkeyesports.com/calendar/"
 
 SPORTS = {
-    "football/college-football": ("Futebol Americano", "🏈"),
-    "basketball/mens-college-basketball": ("Basquete Masculino", "🏀"),
-    "basketball/womens-college-basketball": ("Basquete Feminino", "🏀"),
+    "football/college-football": ("Futebol Americano · NCAA", "🏈"),
 }
 
 # canal -> (onde assistir, link). Ordem importa: chaves mais específicas antes.
@@ -227,9 +226,25 @@ def game_card(g: Game, tz: ZoneInfo) -> str:
 </td></tr>"""
 
 
-def render_email(games: list[Game], title: str, subtitle: str, logo_src: str, tz: ZoneInfo) -> str:
+def later_block(later: list[Game], tz: ZoneInfo) -> str:
+    if not later:
+        return ""
+    rows = []
+    for g in later:
+        vs = "vs." if g.home or g.neutral else "@"
+        d = g.start.astimezone(tz)
+        when = f"{d.day:02d}/{d.month:02d}" + ("" if g.time_tbd else f" · {d:%H:%M}")
+        tv = ", ".join(g.networks) or "TV a definir"
+        rows.append(f"🏈 Iowa {vs} {html.escape(g.opponent)} — {when} ({html.escape(tv)})")
+    return ('<tr><td style="padding:0 24px 12px;font-size:13px;color:#333;line-height:1.7;">'
+            '<b>Próximos jogos:</b><br>' + "<br>".join(rows) + '</td></tr>')
+
+
+def render_email(games: list[Game], title: str, subtitle: str, logo_src: str, tz: ZoneInfo,
+                 later: list[Game] | None = None) -> str:
     cards = "".join(game_card(g, tz) for g in games) or (
-        '<tr><td style="padding:0 24px 16px;font-size:15px;">Nenhum jogo nos próximos dias. Go Hawks! 🐤</td></tr>')
+        '<tr><td style="padding:0 24px 16px;font-size:15px;">Semana de folga (bye week) — sem jogo nos próximos dias. Go Hawks! 🐤</td></tr>')
+    cards += later_block(later or [], tz)
     return f"""<!doctype html>
 <html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
 <body style="margin:0;padding:0;background:#f2f2f2;font-family:Arial,Helvetica,sans-serif;">
@@ -328,17 +343,23 @@ def main() -> int:
         title = "É DIA DE JOGO!"
         subtitle = "Jogo(s) de hoje, com horário de Brasília e onde assistir:"
         first = selected[0]
-        subject = f"🏈🐤 Hoje: Iowa {'vs.' if first.home else '@'} {first.opponent} — {('a definir' if first.time_tbd else first.start.astimezone(tz).strftime('%H:%M'))}"
+        subject = f"🏈 Hoje: Iowa {'vs.' if first.home else '@'} {first.opponent} — {('a definir' if first.time_tbd else first.start.astimezone(tz).strftime('%H:%M'))}"
     else:
         end = now + timedelta(days=days)
         selected = [g for g in upcoming if g.start <= end]
         title = f"Agenda da semana · {today:%d/%m} a {(today + timedelta(days=days - 1)):%d/%m}"
-        subtitle = f"{len(selected)} jogo(s) nos próximos {days} dias. Horários em Brasília, com links para assistir nos EUA (via VPN)."
-        subject = f"🐤 Iowa Hawkeyes — agenda da semana ({len(selected)} jogos)"
+        subtitle = f"{len(selected)} jogo(s) de futebol americano nos próximos {days} dias. Horários em Brasília, com links para assistir nos EUA (via VPN)."
+        if selected:
+            g0 = selected[0]
+            subject = f"🏈 Iowa Hawkeyes {'vs.' if g0.home or g0.neutral else '@'} {g0.opponent} — agenda da semana"
+        else:
+            subject = "🏈 Iowa Hawkeyes — semana de folga"
 
     logo = None if os.environ.get("DRY_RUN") else download_logo()
     logo_src = "cid:hawkeyes-logo" if logo else LOGO_URL
-    html_body = render_email(selected, title, subtitle, logo_src, tz)
+    n_next = int(os.environ.get("NEXT_COUNT", "3"))
+    later = [g for g in upcoming if g not in selected][:n_next] if mode == "digest" else []
+    html_body = render_email(selected, title, subtitle, logo_src, tz, later)
     text_body = render_text(selected, title, tz)
 
     if os.environ.get("DRY_RUN"):

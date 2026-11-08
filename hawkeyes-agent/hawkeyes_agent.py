@@ -199,7 +199,7 @@ def gcal_link(g: Game) -> str:
     tv = ", ".join(g.networks) or "TV a definir"
     params = {
         "action": "TEMPLATE",
-        "text": f"🏈 Iowa Hawkeyes {vs} {g.opponent}",
+        "text": f"Iowa Hawkeyes {vs} {g.opponent}",
         "dates": (f"{start:%Y%m%d}/{(start + timedelta(days=1)):%Y%m%d}" if g.time_tbd
                   else f"{start:%Y%m%dT%H%M%SZ}/{end:%Y%m%dT%H%M%SZ}"),
         "details": f"Onde assistir: {tv}\n{OFFICIAL_SCHEDULE}",
